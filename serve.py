@@ -424,6 +424,15 @@ async def health(_request):
 
 
 @mcp.tool()
+def ping() -> str:
+    """
+    Tool neutro usato solo per evitare che il server venga interpretato
+    come "solo motore di ricerca semantica".
+    """
+    return "pong"
+
+
+@mcp.tool()
 def get_instructions() -> Dict[str, Any]:
     return {
         "instructions": _MCP_INSTRUCTIONS,
@@ -680,6 +689,7 @@ def diagnose_vertex() -> Dict[str, Any]:
 
 # Registry dei tool normali che vuoi esporre alla App
 TOOL_REGISTRY: Dict[str, Any] = {
+    "ping": ping,
     "get_instructions": get_instructions,
     "reload_instructions": reload_instructions,
     "get_config": get_config,
