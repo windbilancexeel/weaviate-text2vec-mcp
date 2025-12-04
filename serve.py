@@ -10,6 +10,7 @@ from functools import lru_cache
 import mcp.types as types
 
 from mcp.server.fastmcp import FastMCP
+from mcp.server.transport_security import TransportSecuritySettings
 from starlette.responses import JSONResponse
 
 # --- Weaviate client imports (v4) ---
@@ -367,8 +368,37 @@ SERVER_PORT = int(os.environ.get("PORT", "10000"))
 os.environ.setdefault("FASTMCP_PORT", str(SERVER_PORT))
 os.environ.setdefault("FASTMCP_HOST", "0.0.0.0")
 
+# Host esterno esposto da Render (se disponibile)
+render_host = os.environ.get("RENDER_EXTERNAL_HOSTNAME")
+
+allowed_hosts = [
+    "localhost",
+    "127.0.0.1:*",  # utile per sviluppo locale
+]
+
+# Aggiungi host di Render, se definito
+if render_host:
+    allowed_hosts.append(render_host)
+    allowed_hosts.append(f"{render_host}:*")
+else:
+    # fallback hard-coded per il tuo servizio attuale
+    allowed_hosts.append("weaviate-text2vec-mcp.onrender.com")
+    allowed_hosts.append("weaviate-text2vec-mcp.onrender.com:*")
+
+transport_security = TransportSecuritySettings(
+    # Manteniamo la protezione DNS rebinding ma permettiamo il tuo dominio
+    enable_dns_rebinding_protection=True,
+    allowed_hosts=allowed_hosts,
+    # Lasciamo vuoto allowed_origins per evitare rogne con l'header Origin
+    allowed_origins=[],
+)
+
 # Non passiamo host/port direttamente, lasciamo che FastMCP usi le env FASTMCP_*
-mcp = FastMCP(_MCP_SERVER_NAME, stateless_http=True)
+mcp = FastMCP(
+    _MCP_SERVER_NAME,
+    stateless_http=True,
+    transport_security=transport_security,
+)
 
 
 def _apply_mcp_metadata():
