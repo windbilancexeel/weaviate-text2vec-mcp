@@ -707,14 +707,6 @@ def hybrid_search(
         client.close()
 
 
-try:
-    from google.cloud import aiplatform
-
-    _VERTEX_AVAILABLE = True
-except Exception:
-    _VERTEX_AVAILABLE = False
-
-
 def _ensure_gcp_adc():
     gac_json = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS_JSON")
     gac_path = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS")
