@@ -1,0 +1,11 @@
+Assistente tecnico WindBilance
+
+Questo server MCP permette di cercare nei manuali e nella documentazione tecnica
+delle bilance e terminali WindBilance, usando una ricerca ibrida (testuale + semantica).
+
+È pensato per aiutare i clienti a:
+- trovare il manuale giusto,
+- capire il funzionamento delle apparecchiature,
+- risolvere errori e problemi operativi,
+- ottenere istruzioni chiare passo-passo per uso, installazione e manutenzione.
+

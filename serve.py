@@ -697,6 +697,8 @@ _HIDDEN_TOOLS: set[str] = {
     "semantic_search",
     "keyword_search",
     "diagnose_vertex",
+    "list_collections",
+    "get_schema",
 }
 
 
