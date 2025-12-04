@@ -1007,36 +1007,34 @@ async def _call_tool_request(req: types.CallToolRequest) -> types.ServerResult:
                 )
             )
 
-        # 🔎 Caso speciale: get_instructions → mostra il prompt in chiaro
-        if name == "get_instructions" and isinstance(result, dict):
-            instructions = result.get("instructions") or "(nessuna instructions caricata)"
-            description = result.get("description") or "(nessuna description caricata)"
+        # A questo punto abbiamo "result" (sincrono o async già risolto)
 
-            text_msg = (
-                "=== ISTRUZIONI (prompt) ===\n"
-                f"{instructions}\n\n"
-                "=== DESCRIZIONE ===\n"
-                f"{description}\n\n"
-                "File prompt: "
-                f"{result.get('prompt_file')}\n"
-                "File description: "
-                f"{result.get('description_file')}"
+        import json as _json
+
+        # Normalizziamo il risultato in una forma strutturata
+        if isinstance(result, (dict, list)):
+            structured = result
+        else:
+            structured = {"result": result}
+
+        # Creiamo una rappresentazione testuale generica (JSON pretty-print)
+        try:
+            text_repr = _json.dumps(structured, ensure_ascii=False, indent=2)
+        except Exception:
+            text_repr = str(structured)
+
+        # Per evitare risposte enormi, tronchiamo solo il testo (NON structuredContent)
+        max_chars = 6000
+        if len(text_repr) > max_chars:
+            text_repr = (
+                text_repr[:max_chars]
+                + "\n\n[Output troncato per lunghezza. I dati completi sono in structuredContent.]"
             )
 
-            return types.ServerResult(
-                types.CallToolResult(
-                    content=[
-                        types.TextContent(
-                            type="text",
-                            text=text_msg,
-                        )
-                    ],
-                    structuredContent=result,
-                )
-            )
-
-        # Default per tutti gli altri tool
-        text_msg = f"Risultato del tool {name} disponibile in structuredContent."
+        text_msg = (
+            f"Risultato del tool {name} in formato strutturato (JSON leggibile):\n\n"
+            f"{text_repr}"
+        )
 
         return types.ServerResult(
             types.CallToolResult(
@@ -1046,9 +1044,7 @@ async def _call_tool_request(req: types.CallToolRequest) -> types.ServerResult:
                         text=text_msg,
                     )
                 ],
-                structuredContent=(
-                    result if isinstance(result, dict) else {"result": result}
-                ),
+                structuredContent=structured,
             )
         )
 
